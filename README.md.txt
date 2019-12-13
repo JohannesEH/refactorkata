@@ -1,0 +1,1 @@
+Example of badly structured poorly written code for use in refactoring kata
