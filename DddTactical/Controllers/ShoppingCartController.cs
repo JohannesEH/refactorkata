@@ -41,6 +41,9 @@ namespace DddTactical.Services
             if (existingCart == null)
                 return NotFound();
 
+            if (cart.State != State.Confirmed)
+                return BadRequest("Cart can only be confirmed.");
+
             var service = new ShoppingService();
 
             service.ConfirmCart(cart);
