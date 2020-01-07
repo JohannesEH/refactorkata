@@ -38,9 +38,9 @@ namespace DddTactical.Services
                         case MemberShipStatus.Basic:
                             return cart.Products.Sum(f => f.Price);
                         case MemberShipStatus.Gold:
-                            return cart.Products.Sum(f => f.Price);
+                            return cart.Products.Sum(f => f.Price)*0.9M;
                         case MemberShipStatus.Platinum:
-                            return cart.Products.Sum(f => f.Price);
+                            return cart.Products.Sum(f => f.Price)*0.75M;
                         default:
                             throw new Exception("Unkonwn membership status");
                     }
