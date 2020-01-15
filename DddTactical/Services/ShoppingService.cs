@@ -1,13 +1,23 @@
 ﻿using DddTactical.Domain;
+using MediatR;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DddTactical.Services
 {
     public class ShoppingService
     {
-        public void ConfirmCart(ShoppingCart cart)
+        private readonly IMediator mediator;
+
+        public ShoppingService(MediatR.IMediator mediator)
         {
+            this.mediator = mediator;
+        }
+
+        public async Task ConfirmCart(ShoppingCart cart)
+        {
+            mediator.
             cart.State = State.Confirmed;
         }
 

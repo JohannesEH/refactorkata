@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Threading.Tasks;
+using DddTactical.Commands;
 using DddTactical.Domain;
+using DddTactical.Queries;
 using DddTactical.Repository;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DddTactical.Services
@@ -9,43 +13,50 @@ namespace DddTactical.Services
     [ApiController]
     public class ShoppingCartController : ControllerBase
     {
-        private ShoppingCartRepository shoppingCartRepository;
+        private readonly IMediator mediator;
 
-        public ShoppingCartController()
+        //private ShoppingCartRepository shoppingCartRepository;
+
+        public ShoppingCartController(MediatR.IMediator mediator)
         {
-            shoppingCartRepository = new ShoppingCartRepository();
+            this.mediator = mediator;
+            //shoppingCartRepository = new ShoppingCartRepository();
         }
 
         [HttpGet("{id}")]
-        public ActionResult<ShoppingCart> Get(Guid id)
+        public async Task<ActionResult<ShoppingCart>> Get(Guid id)
         {
-            var cart = shoppingCartRepository.Find(id);
+            var cart = await mediator.Send(new GetShoppingCartQuery(id));
             return cart == null ? NotFound() : (ActionResult<ShoppingCart>)Ok(cart);
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] ShoppingCart cart)
+        public async Task<IActionResult> Post([FromBody] ShoppingCart cart)
         {
-            if (shoppingCartRepository.Find(cart.Id) != null)
+            if (await mediator.Send(new GetShoppingCartQuery(cart.Id)) != null)
             {
                 return Conflict();
             }
-            shoppingCartRepository.Save(cart);
+
+            await mediator.Publish(new CreateShoppingCartCommand(cart));
+            //shoppingCartRepository.Save(cart);
             return Ok();
         }
 
         [HttpPut("{id}")]
         public IActionResult Put(Guid id, [FromBody] ShoppingCart cart)
         {
-            var existingCart = shoppingCartRepository.Find(id);
+            var existingCart = await mediator.Send(new GetShoppingCartQuery(id));
+            //var existingCart = shoppingCartRepository.Find(id);
             if (existingCart == null)
                 return NotFound();
 
-            if (cart.State != State.Confirmed)
+            if (typeof(cart.State) != ConfirmedState)
                 return BadRequest("Cart can only be confirmed.");
 
             var service = new ShoppingService();
 
+            cart.Confirm();
             service.ConfirmCart(cart);
 
             shoppingCartRepository.Save(cart);

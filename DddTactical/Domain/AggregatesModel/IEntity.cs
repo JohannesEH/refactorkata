@@ -4,6 +4,6 @@ namespace DddTactical.Domain
 {
     public interface IEntity
     {
-        Guid Id { get; set; }
+        Guid Id { get; }
     }
 }
